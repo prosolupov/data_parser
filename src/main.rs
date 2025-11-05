@@ -1,6 +1,8 @@
 mod format;
+mod models;
 
-use format::f_csv::CsvFormat;
+use crate::format::Format;
+use crate::format::csv::CsvFormat;
 use std::fs::File;
 
 fn job_csv() -> Result<(), Box<dyn std::error::Error>> {

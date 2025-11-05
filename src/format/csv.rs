@@ -1,31 +1,20 @@
-use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct CsvRow {
-    tx_id: u64,
-    tx_type: String,
-    from_user_id: u64,
-    to_user_id: u64,
-    amount: f64,
-    timestamp: String,
-    status: String,
-    description: String,
-}
+use crate::format::Format;
+use crate::models::Record;
 
 #[derive(Debug)]
 pub struct CsvFormat {
-    pub csv_rows: Vec<CsvRow>,
+    pub csv_rows: Vec<Record>,
 }
 
-impl CsvFormat {
+impl Format for CsvFormat {
     // Парсит из любого источника, реализующего трейт Read
-    pub fn from_read<R: std::io::Read>(r: &mut R) -> Result<Self, Box<dyn std::error::Error>> {
+    fn from_read<R: std::io::Read>(r: &mut R) -> Result<Self, Box<dyn std::error::Error>> {
         let mut rdr = csv::Reader::from_reader(r);
 
-        let mut csv_rows: Vec<CsvRow> = Vec::new();
+        let mut csv_rows: Vec<Record> = Vec::new();
 
         for record in rdr.deserialize() {
-            let record: CsvRow = record?;
+            let record: Record = record?;
             csv_rows.push(record);
         }
 
@@ -33,7 +22,7 @@ impl CsvFormat {
     }
 
     // Записывает отчёт в любой приёмник, реализующий трейт Write
-    pub fn write_to<W: std::io::Write>(
+    fn write_to<W: std::io::Write>(
         &mut self,
         writer: &mut W,
     ) -> Result<(), Box<dyn std::error::Error>> {
