@@ -1,4 +1,5 @@
 use crate::format::Format;
+use crate::format::csv::CsvFormat;
 use crate::models::Record;
 use std::collections::HashMap;
 use std::error::Error;
@@ -75,5 +76,17 @@ impl fmt::Display for Record {
         writeln!(f, "DESCRIPTION {:?}", self.description)?;
 
         Ok(())
+    }
+}
+
+impl From<Vec<Record>> for TxtFormat {
+    fn from(records: Vec<Record>) -> Self {
+        TxtFormat { txt_rows: records }
+    }
+}
+
+impl From<TxtFormat> for Vec<Record> {
+    fn from(txt: TxtFormat) -> Self {
+        txt.txt_rows
     }
 }

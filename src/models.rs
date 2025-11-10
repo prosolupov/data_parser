@@ -87,3 +87,11 @@ pub struct CliCommand {
     #[arg(short = 'o', long)]
     pub output_format: String,
 }
+
+pub fn convert_format<A, B>(a: A) -> B
+where
+    A: Into<Vec<Record>>,
+    B: From<Vec<Record>>,
+{
+    B::from(a.into())
+}

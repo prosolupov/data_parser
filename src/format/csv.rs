@@ -34,3 +34,15 @@ impl Format for CsvFormat {
         Ok(())
     }
 }
+
+impl From<CsvFormat> for Vec<Record> {
+    fn from(format: CsvFormat) -> Self {
+        format.csv_rows
+    }
+}
+
+impl From<Vec<Record>> for CsvFormat {
+    fn from(records: Vec<Record>) -> Self {
+        CsvFormat { csv_rows: records }
+    }
+}

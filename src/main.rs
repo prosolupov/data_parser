@@ -4,7 +4,7 @@ use crate::format::Format;
 use crate::format::bin::BinFormat;
 use crate::format::csv::CsvFormat;
 use crate::format::txt::TxtFormat;
-use crate::models::CliCommand;
+use crate::models::{convert_format, CliCommand};
 use clap::Parser;
 use std::fs::File;
 
@@ -46,12 +46,23 @@ fn job_bin() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+fn converter(filename: &String) -> Result<(), Box<dyn std::error::Error>> {
+    let mut file: File = File::open("static/csv_example.csv").unwrap();
+    let mut new_file = File::create("static/output.txt")?;
+    let csv:CsvFormat = Format::from_read(&mut file)?;
+    let mut txt: TxtFormat = convert_format(csv);
+    let _ = txt.write_to(&mut new_file);
+
+    Ok(())
+}
+
 fn main() {
     // job_csv().unwrap();
     // job_txt().unwrap();
     // job_bin().unwrap();
 
     let params: CliCommand = CliCommand::parse();
-    
+    converter(&params.input).expect("TODO: panic message");
+
     print!("{:?}", params);
 }

@@ -109,3 +109,15 @@ impl Format for BinFormat {
         Ok(())
     }
 }
+
+impl From<Vec<Record>> for BinFormat {
+    fn from(records: Vec<Record>) -> Self {
+        BinFormat { bin_rows: records }
+    }
+}
+
+impl From<BinFormat> for Vec<Record> {
+    fn from(bin_format: BinFormat) -> Self {
+        bin_format.bin_rows
+    }
+}
