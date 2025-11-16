@@ -1,18 +1,19 @@
-use crate::format::Format;
+use crate::format::DataFormat;
 use crate::format::csv::CsvFormat;
 use crate::models::Record;
 use std::collections::HashMap;
 use std::error::Error;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::{fmt, mem};
+use crate::error::CustomError;
 
 #[derive(Debug)]
 pub struct TxtFormat {
     pub txt_rows: Vec<Record>,
 }
 
-impl Format for TxtFormat {
-    fn from_read<R: Read>(r: &mut R) -> Result<Self, Box<dyn Error>> {
+impl DataFormat for TxtFormat {
+    fn from_read<R: Read>(r: &mut R) -> Result<Self, CustomError> {
         let reader = BufReader::new(r);
         let mut txt_rows: Vec<Record> = Vec::new();
 
@@ -39,7 +40,7 @@ impl Format for TxtFormat {
         Ok(Self { txt_rows })
     }
 
-    fn write_to<W: Write>(&mut self, writer: &mut W) -> Result<(), Box<dyn Error>> {
+    fn write_to<W: Write>(&mut self, writer: &mut W) -> Result<(), CustomError> {
         for (i, record) in self.txt_rows.iter().enumerate() {
             writeln!(writer, "# Record {} ({:?})", i + 1, record.tx_type)?;
             writeln!(writer, "{}", record)?;

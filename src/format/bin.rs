@@ -1,8 +1,9 @@
-use crate::format::Format;
+use crate::format::DataFormat;
 use crate::models::{Record, Status, TxType};
 use std::error::Error;
 use std::io;
 use std::io::{Read, Write};
+use crate::error::CustomError;
 
 #[derive(Debug)]
 pub struct BinFormat {
@@ -11,8 +12,8 @@ pub struct BinFormat {
 
 const YPBN: [u8; 4] = [0x59, 0x50, 0x42, 0x4E];
 
-impl Format for BinFormat {
-    fn from_read<R: Read>(r: &mut R) -> Result<Self, Box<dyn Error>> {
+impl DataFormat for BinFormat {
+    fn from_read<R: Read>(r: &mut R) -> Result<Self, CustomError> {
         let mut bin_rows: Vec<Record> = Vec::new();
 
         loop {
@@ -82,7 +83,7 @@ impl Format for BinFormat {
         Ok(Self { bin_rows })
     }
 
-    fn write_to<W: Write>(&mut self, writer: &mut W) -> Result<(), Box<dyn Error>> {
+    fn write_to<W: Write>(&mut self, writer: &mut W) -> Result<(), CustomError> {
         for record in &self.bin_rows {
             let description_bytes = record.description.as_bytes();
             let desc_len = description_bytes.len() as u32;

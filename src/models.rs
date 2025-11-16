@@ -1,6 +1,16 @@
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use crate::format::bin::BinFormat;
+use crate::format::csv::CsvFormat;
+use crate::format::txt::TxtFormat;
+
+pub enum InputFormat {
+    Csv(CsvFormat),
+    Txt(TxtFormat),
+    Bin(BinFormat),
+}
+
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum TxType {
@@ -64,6 +74,7 @@ impl From<u8> for Status {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
 pub struct Record {
     pub tx_id: u64,
     pub tx_type: TxType,
