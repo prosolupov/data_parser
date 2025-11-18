@@ -1,14 +1,26 @@
-use clap::Parser;
-use serde::{Deserialize, Serialize};
-use std::str::FromStr;
 use crate::format::bin::BinFormat;
 use crate::format::csv::CsvFormat;
 use crate::format::txt::TxtFormat;
+use clap::Parser;
+use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
+#[derive(Debug)]
 pub enum InputFormat {
     Csv(CsvFormat),
     Txt(TxtFormat),
     Bin(BinFormat),
+}
+
+
+impl InputFormat {
+    pub fn get_record(self) -> Vec<Record> {
+        match self {
+            InputFormat::Csv(csv) => csv.into(),
+            InputFormat::Txt(txt) => txt.into(),
+            InputFormat::Bin(bin) => bin.into(),
+        }
+    }
 }
 
 
@@ -99,10 +111,10 @@ pub struct CliCommand {
     pub output_format: String,
 }
 
-pub fn convert_format<A, B>(a: A) -> B
-where
-    A: Into<Vec<Record>>,
-    B: From<Vec<Record>>,
-{
-    B::from(a.into())
-}
+// pub fn convert_format<A, B>(a: A) -> B
+// where
+//     A: Into<Vec<Record>>,
+//     B: From<Vec<Record>>,
+// {
+//     B::from(a.into())
+// }

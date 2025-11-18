@@ -3,6 +3,7 @@ use std::io;
 use std::path::PathBuf;
 use csv::Error;
 
+#[allow(dead_code)]
 pub enum CustomError {
     NotFound(PathBuf),
     Io(io::Error),

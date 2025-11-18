@@ -1,11 +1,9 @@
+use crate::error::CustomError;
 use crate::format::DataFormat;
-use crate::format::csv::CsvFormat;
 use crate::models::Record;
 use std::collections::HashMap;
-use std::error::Error;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::{fmt, mem};
-use crate::error::CustomError;
 
 #[derive(Debug)]
 pub struct TxtFormat {

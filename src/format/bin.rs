@@ -1,9 +1,8 @@
+use crate::error::CustomError;
 use crate::format::DataFormat;
 use crate::models::{Record, Status, TxType};
-use std::error::Error;
 use std::io;
 use std::io::{Read, Write};
-use crate::error::CustomError;
 
 #[derive(Debug)]
 pub struct BinFormat {
