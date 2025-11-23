@@ -1,76 +1,54 @@
 mod error;
 mod format;
 mod models;
+use data_parser::{converter, file_reader};
 
-use crate::error::CustomError;
-use crate::format::bin::BinFormat;
-use crate::format::csv::CsvFormat;
-use crate::format::txt::TxtFormat;
 use crate::format::DataFormat;
-use crate::models::{CliCommand, InputFormat, Record};
 use clap::Parser;
-use std::fs::File;
-use std::path::{Path, PathBuf};
 
-// fn reader_file(filename: String) -> Result<File, Box<dyn std::error::Error>> {
-//     let path = Path::new("static").join(filename);
-//     let mut file = File::open(path);
-//     let file_open = match file {
-//         Ok(mut file) => file,
-//         Err(e) => {
-//             return Err(Box::new(e));
-//         }
-//     };
-//     Ok(file_open)
-// }
+/// CLI-интерфейс для утилиты **data_parser**.
+///
+/// Позволяет конвертировать файлы между форматами:
+///
+/// - `csv`  ←→  `txt`
+/// - `csv`  ←→  `bin`
+/// - `txt`  ←→  `bin`
+///
+/// Формат входных файлов должен соответствовать одному из поддерживаемых
+/// форматов, а выходной формат задаётся явно.
+///
+/// # Пример использования
+///
+/// ```bash
+/// data_parser -i transactions.csv -f csv -o bin
+/// ```
+///
+/// Это прочитает файл `static/transactions.csv`,
+/// распарсит его как CSV,
+/// и создаст файл `static/output.bin` в бинарном формате.
+///
+/// # Аргументы:
+///
+/// * `--input`, `-i` — имя входного файла (только имя, без пути)
+/// * `--input-format`, `-f` — формат входного файла: `csv`, `txt`, `bin`
+/// * `--output-format`, `-o` — формат выходного файла: `csv`, `txt`, `bin`
+///
+/// Все файлы читаются и создаются внутри директории `static/`.
 
-fn file_reader(filename: &str, file_type: &str) -> Result<InputFormat, CustomError> {
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+pub struct CliCommandDataParser {
+    #[arg(short = 'i', long)]
+    pub input: String,
 
-    let path: PathBuf = Path::new("static").join(filename);
-    let mut file: File = File::open(path)?;
+    #[arg(short = 'f', long)]
+    pub input_format: String,
 
-    let file_format = if file_type.to_lowercase() == "csv" {
-        InputFormat::Csv(CsvFormat::from_read(&mut file)?)
-    } else if file_type.to_lowercase() == "txt" {
-        InputFormat::Txt(TxtFormat::from_read(&mut file)?)
-    } else if file_type.to_lowercase() == "bin" {
-        InputFormat::Bin(BinFormat::from_read(&mut file)?)
-    } else {
-        panic!("Input format not recognized");
-    };
-    Ok(file_format)
+    #[arg(short = 'o', long)]
+    pub output_format: String,
 }
-
-fn converter(type_output: &str, input_format: InputFormat) -> Result<(), CustomError> {
-    let records: Vec<Record> = input_format.get_record();
-    let filename = format!("output.{}", type_output);
-    let path: PathBuf = Path::new("static").join(filename);
-    let mut file = File::create(path)?;
-
-    match type_output.to_lowercase().as_str() {
-        "csv" => {
-            let mut out: CsvFormat = CsvFormat::from(records);
-            out.write_to(&mut file)?;
-        },
-        "txt" => {
-            let mut out: TxtFormat = TxtFormat::from(records);
-            out.write_to(&mut file)?;
-        },
-        "bin" => {
-            let mut out: BinFormat = BinFormat::from(records);
-            out.write_to(&mut file)?;
-        },
-        _ => {
-            println!("Input format not recognized");
-        }
-    }
-
-    Ok(())
-}
-
-
 fn main() {
-    let params: CliCommand = CliCommand::parse();
+    let params: CliCommandDataParser = CliCommandDataParser::parse();
     let data_file = file_reader(&params.input, &params.input_format);
 
     let data = match data_file {
@@ -79,5 +57,25 @@ fn main() {
     };
 
     let _ = converter(&params.output_format, data);
+}
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn check_cli_data_parser() {
+        let args = CliCommandDataParser::parse_from([
+            "data_parser",
+            "--input",
+            "a.bin",
+            "--input-format",
+            "bin",
+            "--output-format",
+            "csv",
+        ]);
+
+        assert_eq!(args.input, "a.bin");
+        assert_eq!(args.input_format, "bin");
+        assert_eq!(args.output_format, "csv");
+    }
 }

@@ -1,9 +1,12 @@
+use csv::Error;
 use std::fmt::Display;
 use std::io;
 use std::path::PathBuf;
-use csv::Error;
+
+/// Файл с описанием ошибок
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub enum CustomError {
     NotFound(PathBuf),
     Io(io::Error),

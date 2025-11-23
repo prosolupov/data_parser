@@ -5,6 +5,8 @@ use std::collections::HashMap;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::{fmt, mem};
 
+///  Текстовый формат
+/// Чтение и создание текстового формата
 #[derive(Debug)]
 pub struct TxtFormat {
     pub txt_rows: Vec<Record>,
@@ -58,21 +60,27 @@ impl TxtFormat {
             amount: payload.get("AMOUNT").unwrap().parse().unwrap(),
             timestamp: payload.get("TIMESTAMP").unwrap().parse().unwrap(),
             status: payload.get("STATUS").unwrap().parse().unwrap(),
-            description: payload.get("DESCRIPTION").unwrap().parse().unwrap(),
+            description: payload
+                .get("DESCRIPTION")
+                .unwrap()
+                .trim()
+                .trim_start_matches('"')
+                .trim_end_matches('"')
+                .to_string(),
         }
     }
 }
 
 impl fmt::Display for Record {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "TX_ID {:?}", self.tx_id.to_string())?;
-        writeln!(f, "TX_TYPE {:?}", self.tx_type)?;
-        writeln!(f, "FROM_USER_ID {:?}", self.from_user_id)?;
-        writeln!(f, "TO_USER_ID {:?}", self.to_user_id)?;
-        writeln!(f, "AMOUNT {:?}", self.amount)?;
-        writeln!(f, "TIMESTAMP {:?}", self.timestamp)?;
-        writeln!(f, "STATUS {:?}", self.status)?;
-        writeln!(f, "DESCRIPTION {:?}", self.description)?;
+        writeln!(f, "TX_ID: {:?}", self.tx_id)?;
+        writeln!(f, "TX_TYPE: {:?}", self.tx_type)?;
+        writeln!(f, "FROM_USER_ID: {:?}", self.from_user_id)?;
+        writeln!(f, "TO_USER_ID: {:?}", self.to_user_id)?;
+        writeln!(f, "AMOUNT: {:?}", self.amount)?;
+        writeln!(f, "TIMESTAMP: {:?}", self.timestamp)?;
+        writeln!(f, "STATUS: {:?}", self.status)?;
+        writeln!(f, "DESCRIPTION: \"{}\"", self.description)?;
 
         Ok(())
     }
@@ -87,5 +95,50 @@ impl From<Vec<Record>> for TxtFormat {
 impl From<TxtFormat> for Vec<Record> {
     fn from(txt: TxtFormat) -> Self {
         txt.txt_rows
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::{Status, TxType};
+    use std::io::Cursor;
+
+    fn txt_record() -> Record {
+        Record {
+            tx_id: 1,
+            from_user_id: 10,
+            to_user_id: 20,
+            amount: 100,
+            timestamp: 123456789,
+            tx_type: TxType::DEPOSIT,
+            status: Status::FAILURE,
+            description: "Record number 1".to_string(),
+        }
+    }
+
+    #[test]
+    fn txt_write_then_read() -> Result<(), CustomError> {
+        let rec = txt_record();
+
+        let mut txt = TxtFormat {
+            txt_rows: vec![rec.clone()],
+        };
+
+        let mut buf: Vec<u8> = Vec::new();
+
+        {
+            let mut cursor = Cursor::new(&mut buf);
+            txt.write_to(&mut cursor)?;
+        }
+
+        let mut cursor = Cursor::new(&buf);
+
+        let parsed = TxtFormat::from_read(&mut cursor)?;
+
+        assert_eq!(parsed.txt_rows.len(), 1);
+        assert_eq!(parsed.txt_rows[0], rec);
+
+        Ok(())
     }
 }

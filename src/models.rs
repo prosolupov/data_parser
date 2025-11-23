@@ -1,17 +1,22 @@
 use crate::format::bin::BinFormat;
 use crate::format::csv::CsvFormat;
 use crate::format::txt::TxtFormat;
-use clap::Parser;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
+/// Перечисление, представляющее входной формат данных.
+///
+/// При чтении файла (CSV, TXT или BIN) конкретный формат парсит данные и
+/// конвертируется в один из вариантов этого enum’а.
+///
+/// Это позволяет единообразно работать с разными форматами, затем вызывая
+/// `get_record()` чтобы получить `Vec<Record>`.
 #[derive(Debug)]
 pub enum InputFormat {
     Csv(CsvFormat),
     Txt(TxtFormat),
     Bin(BinFormat),
 }
-
 
 impl InputFormat {
     pub fn get_record(self) -> Vec<Record> {
@@ -23,8 +28,10 @@ impl InputFormat {
     }
 }
 
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
+/// Тип транзакции.
+///
+/// Используется в файлах TXT, CSV и BIN.
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum TxType {
     DEPOSIT,
     TRANSFER,
@@ -33,6 +40,8 @@ pub enum TxType {
 
 impl FromStr for TxType {
     type Err = String;
+
+    /// Позволяет распарсить TxType из строки.
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
@@ -55,7 +64,8 @@ impl From<u8> for TxType {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+/// Статус транзакции.
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum Status {
     SUCCESS,
     FAILURE,
@@ -64,6 +74,8 @@ pub enum Status {
 
 impl FromStr for Status {
     type Err = String;
+
+    /// Позволяет распарсить Status из строки.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "SUCCESS" => Ok(Status::SUCCESS),
@@ -75,6 +87,7 @@ impl FromStr for Status {
 }
 
 impl From<u8> for Status {
+    /// Позволяет распарсить Status из байтов.
     fn from(item: u8) -> Self {
         match item {
             0 => Status::SUCCESS,
@@ -85,7 +98,8 @@ impl From<u8> for Status {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+/// Структура файлов
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "UPPERCASE")]
 pub struct Record {
     pub tx_id: u64,
@@ -96,19 +110,6 @@ pub struct Record {
     pub timestamp: u64,
     pub status: Status,
     pub description: String,
-}
-
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-pub struct CliCommand {
-    #[arg(short = 'i', long)]
-    pub input: String,
-
-    #[arg(short = 'f', long)]
-    pub input_format: String,
-
-    #[arg(short = 'o', long)]
-    pub output_format: String,
 }
 
 // pub fn convert_format<A, B>(a: A) -> B

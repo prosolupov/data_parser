@@ -2,6 +2,9 @@ use crate::error::CustomError;
 use crate::format::DataFormat;
 use crate::models::Record;
 
+/// CSV формат
+/// Чтение и создание csv формата
+
 #[derive(Debug)]
 pub struct CsvFormat {
     pub csv_rows: Vec<Record>,
@@ -23,13 +26,10 @@ impl DataFormat for CsvFormat {
     }
 
     // Записывает отчёт в любой приёмник, реализующий трейт Write
-    fn write_to<W: std::io::Write>(
-        &mut self,
-        writer: &mut W,
-    ) -> Result<(), CustomError> {
+    fn write_to<W: std::io::Write>(&mut self, writer: &mut W) -> Result<(), CustomError> {
         let mut csv_writer = csv::Writer::from_writer(writer);
         for row in &self.csv_rows {
-            let _ =csv_writer.serialize(row);
+            let _ = csv_writer.serialize(row);
         }
         csv_writer.flush()?;
         Ok(())
