@@ -3,6 +3,7 @@ use crate::format::csv::CsvFormat;
 use crate::format::txt::TxtFormat;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use strum_macros::EnumString;
 
 /// Перечисление, представляющее входной формат данных.
 ///
@@ -31,26 +32,11 @@ impl InputFormat {
 /// Тип транзакции.
 ///
 /// Используется в файлах TXT, CSV и BIN.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(EnumString, Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum TxType {
     DEPOSIT,
     TRANSFER,
     WITHDRAWAL,
-}
-
-impl FromStr for TxType {
-    type Err = String;
-
-    /// Позволяет распарсить TxType из строки.
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "DEPOSIT" => Ok(TxType::DEPOSIT),
-            "TRANSFER" => Ok(TxType::TRANSFER),
-            "WITHDRAWAL" => Ok(TxType::WITHDRAWAL),
-            _ => Err(format!("Нет такого tx type {}", s)),
-        }
-    }
 }
 
 impl From<u8> for TxType {
@@ -65,25 +51,11 @@ impl From<u8> for TxType {
 }
 
 /// Статус транзакции.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(EnumString, Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum Status {
     SUCCESS,
     FAILURE,
     PENDING,
-}
-
-impl FromStr for Status {
-    type Err = String;
-
-    /// Позволяет распарсить Status из строки.
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "SUCCESS" => Ok(Status::SUCCESS),
-            "FAILURE" => Ok(Status::FAILURE),
-            "PENDING" => Ok(Status::PENDING),
-            _ => Err(format!("Нет такого статуса {}", s)),
-        }
-    }
 }
 
 impl From<u8> for Status {

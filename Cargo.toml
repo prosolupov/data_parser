@@ -7,3 +7,6 @@ edition = "2024"
 serde = { version = "1", features = ["derive"] }
 csv = "1"
 clap = { version = "4", features = ["derive"] }
+thiserror = "2"
+strum = "0.27"
+strum_macros = "0.27"
