@@ -1,6 +1,6 @@
 use clap::Parser;
 use data_parser::file_reader;
-use data_parser::models::{InputFormat, Record};
+use data_parser::models::{Format, InputFormat, Record};
 
 /// CLI-команда `comparer`
 ///
@@ -26,11 +26,11 @@ pub struct CliCommandComparer {
     #[arg(long)]
     pub file1: String,
     #[arg(long)]
-    pub format1: String,
+    pub format1: Format,
     #[arg(long)]
     pub file2: String,
     #[arg(long)]
-    pub format2: String,
+    pub format2: Format,
 }
 
 fn check_file(file_one: InputFormat, file_two: InputFormat) -> Option<Record> {
@@ -47,19 +47,19 @@ fn check_file(file_one: InputFormat, file_two: InputFormat) -> Option<Record> {
     None
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let params: CliCommandComparer = CliCommandComparer::parse();
-    let file_one = file_reader(&params.file1, &params.format1);
-    let file_two = file_reader(&params.file2, &params.format2);
+    let file_one = file_reader(&params.file1, params.format1);
+    let file_two = file_reader(&params.file2, params.format2);
 
     let file1 = match file_one {
         Ok(data_file) => data_file,
-        Err(e) => return println!("{}", e),
+        Err(e) => return Err(Box::new(e)),
     };
 
     let file2 = match file_two {
         Ok(data_file) => data_file,
-        Err(e) => return println!("{}", e),
+        Err(e) => return Err(Box::new(e)),
     };
 
     let result = check_file(file1, file2);
@@ -71,6 +71,7 @@ fn main() {
             &params.file1, &params.file2
         ),
     }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -92,8 +93,8 @@ mod tests {
         ]);
 
         assert_eq!(args.file1, "a.bin");
-        assert_eq!(args.format1, "bin");
+        assert_eq!(args.format1, Format::Bin);
         assert_eq!(args.file2, "b.csv");
-        assert_eq!(args.format2, "csv");
+        assert_eq!(args.format2, Format::Csv);
     }
 }

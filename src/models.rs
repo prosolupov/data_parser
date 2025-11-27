@@ -1,9 +1,19 @@
 use crate::format::bin::BinFormat;
 use crate::format::csv::CsvFormat;
 use crate::format::txt::TxtFormat;
+use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
 use strum_macros::EnumString;
+
+#[derive(ValueEnum, Clone, Debug, PartialEq)]
+pub enum Format {
+    #[value(name = "csv")]
+    Csv,
+    #[value(name = "txt")]
+    Txt,
+    #[value(name = "bin")]
+    Bin,
+}
 
 /// Перечисление, представляющее входной формат данных.
 ///
@@ -33,7 +43,11 @@ impl InputFormat {
 ///
 /// Используется в файлах TXT, CSV и BIN.
 #[derive(EnumString, Serialize, Deserialize, Debug, Clone, PartialEq)]
+// #[strum(serialize_all = "UPPERCASE")]
 pub enum TxType {
+    // Deposit,
+    // Transfer,
+    // Withdrawal,
     DEPOSIT,
     TRANSFER,
     WITHDRAWAL,
@@ -52,6 +66,7 @@ impl From<u8> for TxType {
 
 /// Статус транзакции.
 #[derive(EnumString, Serialize, Deserialize, Debug, Clone, PartialEq)]
+// #[strum(serialize_all = "UPPERCASE")]
 pub enum Status {
     SUCCESS,
     FAILURE,

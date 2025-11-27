@@ -30,7 +30,7 @@ impl DataFormat for TxtFormat {
                         }
                     } else if !current_block_data.is_empty() {
                         let record = TxtFormat::created_record(mem::take(&mut current_block_data));
-                        txt_rows.push(record);
+                        txt_rows.push(record?);
                     }
                 }
                 Err(e) => return Err(e.into()),
@@ -50,24 +50,47 @@ impl DataFormat for TxtFormat {
     }
 }
 
+fn get_num(map: &HashMap<String, String>, key: &str) -> Result<u64, CustomError> {
+    map.get(key)
+        .ok_or_else(|| CustomError::MissingField(key.to_string()))?
+        .parse()
+        .map_err(|_| CustomError::InvalidData(key.to_string()))
+}
+
 impl TxtFormat {
-    fn created_record(payload: HashMap<String, String>) -> Record {
-        Record {
-            tx_id: payload.get("TX_ID").unwrap().parse().unwrap(),
-            tx_type: payload.get("TX_TYPE").unwrap().parse().unwrap(),
-            from_user_id: payload.get("FROM_USER_ID").unwrap().parse().unwrap(),
-            to_user_id: payload.get("TO_USER_ID").unwrap().parse().unwrap(),
-            amount: payload.get("AMOUNT").unwrap().parse().unwrap(),
-            timestamp: payload.get("TIMESTAMP").unwrap().parse().unwrap(),
-            status: payload.get("STATUS").unwrap().parse().unwrap(),
+    fn created_record(payload: HashMap<String, String>) -> Result<Record, CustomError> {
+        Ok(Record {
+            tx_id: get_num(&payload, "TX_ID")?,
+            tx_type: payload
+                .get("TX_TYPE")
+                .ok_or(CustomError::MissingField(String::from("STATUS")))?
+                .parse()
+                .map_err(|_| {
+                    CustomError::InvalidEnum(String::from(String::from(
+                        "Ошибка конвертиции TX_TYPE",
+                    )))
+                })?,
+            from_user_id: get_num(&payload, "FROM_USER_ID")?,
+            to_user_id: get_num(&payload, "TO_USER_ID")?,
+            amount: get_num(&payload, "AMOUNT")?,
+            timestamp: get_num(&payload, "TIMESTAMP")?,
+            status: payload
+                .get("STATUS")
+                .ok_or(CustomError::MissingField(String::from("STATUS")))?
+                .parse()
+                .map_err(|_| {
+                    CustomError::InvalidEnum(String::from(String::from(
+                        "Ошибка конвертиции  STATUS ",
+                    )))
+                })?,
             description: payload
                 .get("DESCRIPTION")
-                .unwrap()
+                .ok_or(CustomError::MissingField(String::from("DESCRIPTION")))?
                 .trim()
                 .trim_start_matches('"')
                 .trim_end_matches('"')
                 .to_string(),
-        }
+        })
     }
 }
 

@@ -5,6 +5,7 @@ use data_parser::{converter, file_reader};
 
 use crate::format::DataFormat;
 use clap::Parser;
+use data_parser::models::Format;
 
 /// CLI-интерфейс для утилиты **data_parser**.
 ///
@@ -42,21 +43,23 @@ pub struct CliCommandDataParser {
     pub input: String,
 
     #[arg(short = 'f', long)]
-    pub input_format: String,
+    pub input_format: Format,
 
     #[arg(short = 'o', long)]
-    pub output_format: String,
+    pub output_format: Format,
 }
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let params: CliCommandDataParser = CliCommandDataParser::parse();
-    let data_file = file_reader(&params.input, &params.input_format);
+    let data_file = file_reader(&params.input, params.input_format);
 
     let data = match data_file {
         Ok(data_file) => data_file,
-        Err(e) => return println!("{}", e),
+        Err(e) => return Err(Box::new(e)),
     };
 
-    let _ = converter(&params.output_format, data);
+    let _ = converter(params.output_format, data);
+
+    Ok(())
 }
 
 #[cfg(test)]
@@ -75,7 +78,7 @@ mod tests {
         ]);
 
         assert_eq!(args.input, "a.bin");
-        assert_eq!(args.input_format, "bin");
-        assert_eq!(args.output_format, "csv");
+        assert_eq!(args.input_format, Format::Bin);
+        assert_eq!(args.output_format, Format::Csv);
     }
 }
