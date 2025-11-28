@@ -1,11 +1,6 @@
-mod error;
-mod format;
-mod models;
-use data_parser::{converter, file_reader};
-
-use crate::format::DataFormat;
 use clap::Parser;
-use data_parser::models::Format;
+use parser::models::Format;
+use parser::{converter, file_reader};
 
 /// CLI-интерфейс для утилиты **data_parser**.
 ///
@@ -68,7 +63,7 @@ mod tests {
     #[test]
     fn check_cli_data_parser() {
         let args = CliCommandDataParser::parse_from([
-            "data_parser",
+            "converter",
             "--input",
             "a.bin",
             "--input-format",

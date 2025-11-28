@@ -5,12 +5,16 @@ use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumString;
 
+///Перечисление принимаемых форматов
 #[derive(ValueEnum, Clone, Debug, PartialEq)]
 pub enum Format {
+    ///Формат CSV
     #[value(name = "csv")]
     Csv,
+    ///Формат Txt
     #[value(name = "txt")]
     Txt,
+    ///Формат Bin
     #[value(name = "bin")]
     Bin,
 }
@@ -24,12 +28,16 @@ pub enum Format {
 /// `get_record()` чтобы получить `Vec<Record>`.
 #[derive(Debug)]
 pub enum InputFormat {
+    ///Входной формат Csv
     Csv(CsvFormat),
+    ///Входной формат Txt
     Txt(TxtFormat),
+    ///Входной формат Bin
     Bin(BinFormat),
 }
 
 impl InputFormat {
+    ///Функция для получения вектора из InputFormat
     pub fn get_record(self) -> Vec<Record> {
         match self {
             InputFormat::Csv(csv) => csv.into(),
@@ -44,12 +52,13 @@ impl InputFormat {
 /// Используется в файлах TXT, CSV и BIN.
 #[derive(EnumString, Serialize, Deserialize, Debug, Clone, PartialEq)]
 // #[strum(serialize_all = "UPPERCASE")]
+///Перечисление типов транзакций
 pub enum TxType {
-    // Deposit,
-    // Transfer,
-    // Withdrawal,
+    ///Тип DEPOSIT
     DEPOSIT,
+    ///Тип TRANSFER
     TRANSFER,
+    ///Тип WITHDRAWAL
     WITHDRAWAL,
 }
 
@@ -67,9 +76,13 @@ impl From<u8> for TxType {
 /// Статус транзакции.
 #[derive(EnumString, Serialize, Deserialize, Debug, Clone, PartialEq)]
 // #[strum(serialize_all = "UPPERCASE")]
+///Перечисление состояний транзакций
 pub enum Status {
+    ///Состояние SUCCESS
     SUCCESS,
+    ///Состояние FAILURE
     FAILURE,
+    ///Состояние PENDING
     PENDING,
 }
 
@@ -89,13 +102,21 @@ impl From<u8> for Status {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(rename_all = "UPPERCASE")]
 pub struct Record {
+    ///неотрицательное целое число, идентифицирующее транзакцию
     pub tx_id: u64,
+    ///тип транзакции: `DEPOSIT`, `TRANSFER`, или `WITHDRAWAL`
     pub tx_type: TxType,
+    ///неотрицательное целое число, идентифицирующее отправитель счета
     pub from_user_id: u64,
+    ///неотрицательное целое число, идентифицирующее получателя счета
     pub to_user_id: u64,
+    ///неотрицательное целое число, представляющее сумму в наименьшей единице валюты
     pub amount: u64,
+    ///Unix epoch timestamp в миллисекундах
     pub timestamp: u64,
+    ///состояние транзакции: `SUCCESS`, `FAILURE`, или `PENDING`
     pub status: Status,
+    ///произвольное текстовое описание, UTF-8 в двойныхкавычках
     pub description: String,
 }
 

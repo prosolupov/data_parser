@@ -22,14 +22,14 @@
 //! Пример:
 //!
 //! ```rust
-//! use data_parser::file_reader;
-//! use data_parser::models::Format;
+//! use parser::file_reader;
+//! use parser::models::Format;
 //!
 //! // Перед использованием убедитесь, что файл находится в папке "static".
 //! // Здесь пример создания тестового файла:
-//! std::fs::create_dir_all("static").unwrap();
+//! std::fs::create_dir_all("../static").unwrap();
 //! std::fs::write(
-//!     "static/example.csv",
+//!     "../static/example.csv",
 //!     "TX_ID,TX_TYPE,FROM_USER_ID,TO_USER_ID,AMOUNT,TIMESTAMP,STATUS,DESCRIPTION\n\
 //!      1,DEPOSIT,10,20,100,123456789,SUCCESS,\"Test\"",
 //! ).unwrap();
@@ -50,12 +50,13 @@
 //! и создаёт файл `static/output.<format>`.
 //!
 //! ```rust
-//! use data_parser::{file_reader, converter};
-//! use data_parser::models::Format;
+//! use parser::{file_reader, converter};
+//! use parser::models::Format;
+//! use std::path::Path;
 //!
-//! std::fs::create_dir_all("static").unwrap();
+//! std::fs::create_dir_all("../static").unwrap();
 //! std::fs::write(
-//!     "static/sample.csv",
+//!     "../static/sample.csv",
 //!     "TX_ID,TX_TYPE,FROM_USER_ID,TO_USER_ID,AMOUNT,TIMESTAMP,STATUS,DESCRIPTION\n\
 //!      1,DEPOSIT,1,2,50,42,SUCCESS,\"Hi\"",
 //! ).unwrap();
@@ -65,7 +66,7 @@
 //! // Конвертация CSV → TXT
 //! converter(Format::Txt, input);
 //!
-//! assert!(std::path::Path::new("static/output.txt").exists());
+//! assert!(Path::new("../../static").join("output.txt").exists());
 //! ```
 //!
 //! ## Модули
@@ -99,6 +100,8 @@
 //! интегрируются с оператором `?`.
 mod error;
 mod format;
+
+/// Файл содержит необходимые структуры данных
 pub mod models;
 
 use crate::format::DataFormat;
@@ -109,7 +112,6 @@ use format::csv::CsvFormat;
 use format::txt::TxtFormat;
 use models::Format;
 use models::InputFormat;
-use std::cmp::PartialEq;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
@@ -126,7 +128,7 @@ use std::path::{Path, PathBuf};
 ///
 
 pub fn file_reader(filename: &str, file_type: Format) -> Result<InputFormat, CustomError> {
-    let path: PathBuf = Path::new("static").join(filename);
+    let path: PathBuf = Path::new("../../static").join(filename);
     let mut file: File = File::open(path)?;
 
     let file_format = if file_type == Format::Csv {
@@ -171,7 +173,7 @@ pub fn converter(type_output: Format, input_format: InputFormat) -> Result<(), C
         Format::Txt => format!("output.txt"),
         Format::Bin => format!("output.bin"),
     };
-    let path: PathBuf = Path::new("static").join(filename);
+    let path: PathBuf = Path::new("../../static").join(filename);
     let mut file = File::create(path)?;
 
     match type_output {
@@ -211,20 +213,21 @@ mod tests {
         }
     }
 
+
     #[test]
-    fn file_reader_reads_csv_roundtrip() -> Result<(), CustomError> {
-        fs::create_dir_all("static").unwrap();
+    fn file_reader_reads_csv_round() -> Result<(), CustomError> {
+        fs::create_dir_all("../static").unwrap();
 
         let records = vec![sample_record()];
 
-        let path = Path::new("static").join("test.csv");
+        let path = Path::new("../static").join("test.csv");
         {
             let mut file = File::create(&path)?;
             let mut csv_format: CsvFormat = CsvFormat::from(records.clone());
             csv_format.write_to(&mut file)?;
         }
 
-        let input_format = file_reader("test.csv", Format::Csv)?;
+        let input_format = file_reader("../static/test.csv", Format::Csv)?;
         let parsed_records: Vec<Record> = input_format.get_record();
 
         assert_eq!(parsed_records, records);
@@ -233,11 +236,11 @@ mod tests {
     }
     #[test]
     fn converter_creates_output_csv() -> Result<(), CustomError> {
-        fs::create_dir_all("static").unwrap();
+        fs::create_dir_all("../static").unwrap();
 
         let records = vec![sample_record()];
 
-        let out_path = Path::new("static").join("output.csv");
+        let out_path = Path::new("../../static").join("output.csv");
         let _ = fs::remove_file(&out_path);
 
         let csv_format: CsvFormat = CsvFormat::from(records.clone());
@@ -255,7 +258,7 @@ mod tests {
 
     #[test]
     fn file_reader_nonexistent_file() {
-        let res = file_reader("no_such_file.csv", Format::Csv);
+        let res = file_reader("static/no_such_file.csv", Format::Csv);
 
         assert!(res.is_err());
 

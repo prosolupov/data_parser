@@ -1,15 +1,15 @@
 use clap::Parser;
-use data_parser::file_reader;
-use data_parser::models::{Format, InputFormat, Record};
+use parser::file_reader;
+use parser::models::{Format, InputFormat, Record};
 
-/// CLI-команда `comparer`
+/// CLI-команда `comparer___`
 ///
 /// Позволяет сравнить два файла разных форматов (TXT, CSV, BIN),
 /// построчно и поэлементно сравнив содержимое `Record`.
 ///
 /// # Пример использования:
 /// ```bash
-/// comparer --file1 a.bin --format1 bin --file2 b.csv --format2 csv
+/// comparer___ --file1 a.bin --format1 bin --file2 b.csv --format2 csv
 /// ```
 ///
 /// # Опции:

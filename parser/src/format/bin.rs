@@ -133,7 +133,6 @@ impl From<BinFormat> for Vec<Record> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::format::txt::TxtFormat;
     use std::io::Cursor;
     fn bin_record() -> Record {
         Record {
