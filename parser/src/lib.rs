@@ -227,7 +227,7 @@ mod tests {
             csv_format.write_to(&mut file)?;
         }
 
-        let input_format = file_reader("../static/test.csv", Format::Csv)?;
+        let input_format = file_reader("test.csv", Format::Csv)?;
         let parsed_records: Vec<Record> = input_format.get_record();
 
         assert_eq!(parsed_records, records);
